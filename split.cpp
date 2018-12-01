@@ -103,7 +103,7 @@ int main()
   return 0;
 }
 
-void body_seg(string src)
+void body_seg(string src)    //输入一张行人图片的文件名，会将行人按照躯干和腿部区分
 {
   Mat img = imread(src);
   int width,height;
@@ -111,7 +111,7 @@ void body_seg(string src)
   height = img.cols;
   int i,j,k;
   int row_1,row_2,row_3;
-  row_1 = int(0.19*width);
+  row_1 = int(0.19*width);   //设置躯干部分的参数，将高度为整体高度0.19倍处设置为躯干的默认开始位置，设置躯干部分的宽度为整体宽度的0.9倍
   row_2 = int(0.5*width);
   row_3 = int(0.7*width);
 
@@ -127,7 +127,7 @@ void body_seg(string src)
   {
     for(j=body_1;j<body_2;j=j+1)
     {
-      img.at<cv::Vec3b>(i,j)[0]=255;
+      img.at<cv::Vec3b>(i,j)[0]=255;   //改变图像中的像素值，将区分开的部分用蓝线画出来
       img.at<cv::Vec3b>(i,j)[1]=0;
       img.at<cv::Vec3b>(i,j)[2]=0;
     }
@@ -196,9 +196,9 @@ void body_seg(string src)
   waitKey(0);
 }
 
-void calcu_hist(Mat src_image,int dime,int hist[],int start_row,int start_col,int end_row,int end_col,int patch,int small_value,int big_value)
+void calcu_hist(Mat src_image,int dime,int hist[],int start_row,int start_col,int end_row,int end_col,int patch,int small_value,int big_value) //计算输入图像的颜色直方图，给出待计算部分图像的起始和结束坐标，以及待统计的最大最小值设置。
 {
-  memset(hist, 0, sizeof(int)*300);
+  memset(hist, 0, sizeof(int)*300);     //将要返回的直方图全局变量清空
   int allnumber = (big_value-small_value)/patch + 1;
   int value;
   hist[0] = allnumber;
@@ -210,42 +210,42 @@ void calcu_hist(Mat src_image,int dime,int hist[],int start_row,int start_col,in
       value = int(src_image.at<Vec3b>(i,j)[dime]);
       if(value > (small_value-1) && value <(big_value+1) )
       {
-        hist[(value-small_value)/patch+1] = hist[(value-small_value)/patch+1] + 1;
+        hist[(value-small_value)/patch+1] = hist[(value-small_value)/patch+1] + 1;   //设置统计密度
       }
     }
   }
 
 }
 
-void draw_hist(int hist_array[],string img_name)
+void draw_hist(int hist_array[],string img_name)   //将统计得到的直方图画出来，并且保存为图片的形式，方便统计
 {
   int color_num,index;
   color_num = hist_array[0];
 
-  Mat hist_diagram = Mat::zeros(Size(color_num*5+100,600),CV_8UC3);
+  Mat hist_diagram = Mat::zeros(Size(color_num*5+100,600),CV_8UC3);  //生成存放直方图的基础零图片矩阵
   cout<<hist_diagram.channels()<<endl;
-  cout<<"start"<<endl;
+
   int i,j,k;
   for(i=1;i<(color_num+1);i=i+1)
   {
-    cout<<"1for"<<endl;
+
     for(j=400-hist_array[i];j<400;j=j+1)
     {
-      cout<<"2for"<<endl;
+
       for(k=50+i*5;k<50+(i+1)*5;k=k+1)
       {
-        cout<<"3for"<<endl;
+
         if(0==i%2)
         {
-          cout<<"ifstart"<<endl;
+
           hist_diagram.at<Vec3b>(j,k)[0]=255;
-          cout<<"ddddd"<<endl;
+
         }
         else
         {
-          cout<<"elsestart"<<endl;
+
           hist_diagram.at<Vec3b>(j,k)[1]=255;
-          cout<<"else end"<<endl;
+
         }
       }
     }
@@ -256,7 +256,7 @@ void draw_hist(int hist_array[],string img_name)
   waitKey(0);
 }
 
-double calcu_distance(int hist1[],int hist2[])
+double calcu_distance(int hist1[],int hist2[])   //计算两个直方图之间的巴氏距离，用于后期的图像相似性对比
 {
   double distance=0.0;
   int color_num = hist1[0];
@@ -278,7 +278,7 @@ double calcu_distance(int hist1[],int hist2[])
 
 }
 
-vector<string> get_filename_in_direct(string path)
+vector<string> get_filename_in_direct(string path)  //输入一个文件夹的路径，返回文件夹内所有文件名称的string向量，用来获取文件夹中的所有图片名称
 {
   struct dirent *ptr;
   DIR *dir;
@@ -294,7 +294,7 @@ vector<string> get_filename_in_direct(string path)
   return files;
 }
 
-double distance_between_two_img(string img_path1,string img_path2)
+double distance_between_two_img(string img_path1,string img_path2)   //计算两张图片之间的巴氏距离，只要输入两张图片名称就可以
 {
   double distance = 0.0;
   int init_hist[300];
@@ -303,7 +303,7 @@ double distance_between_two_img(string img_path1,string img_path2)
   Mat img1,img2,hsv1,hsv2;
   img1 = imread(img_path1);
   img2 = imread(img_path2);
-  cvtColor(img1,hsv1,CV_BGR2HSV);
+  cvtColor(img1,hsv1,CV_BGR2HSV);     //将BGR图片转换为hsv
   cvtColor(img2,hsv2,CV_BGR2HSV);
   int width,height;
   width = img1.cols;
@@ -323,7 +323,7 @@ double distance_between_two_img(string img_path1,string img_path2)
   {
     row_list[i+5] = int((0.5+i*0.04)*height );
   }
-  for(i=0;i<5;i=i+1)
+  for(i=0;i<5;i=i+1)    //将行人分块比对，分为上半身和下半身，每部分又分为五个小部分
   {
     calcu_hist(hsv1,0,init_hist,row_list[i],col_start_body,row_list[i+1],col_end_body,10,0,180);
     memcpy(hist1,init_hist,sizeof(init_hist));
@@ -367,7 +367,7 @@ double distance_between_two_img(string img_path1,string img_path2)
   return distance;
 }
 
-double accuracy_test(string path_input,string path_test)
+double accuracy_test(string path_input,string path_test)   //输入待对比的两个文件夹的名称和位置
 {
   double accuracy = 0.0;
   vector<string> input_list;
@@ -412,7 +412,7 @@ double accuracy_test(string path_input,string path_test)
 }
 
 
-vector<string> get_topn(string img_id,string dir_path,int topn)
+vector<string> get_topn(string img_id,string dir_path,int topn)  //当输入待比对的图片后，在图片库中搜索topn个最相近的图片返回名称
 {
   vector<string> result;
   string pure_img;
@@ -458,7 +458,7 @@ vector<string> get_topn(string img_id,string dir_path,int topn)
   return result;
 }
 
-void insert_data2database(vector<string> row)
+void insert_data2database(vector<string> row)  //将一行记录插入数据库中
 {
 	int count = row.size();
 	int i;
@@ -486,7 +486,7 @@ void insert_data2database(vector<string> row)
 	mysql_close(&mysql);
 }
 
-vector<string> get_record_from_database(int position,string cameraid)
+vector<string> get_record_from_database(int position,string cameraid) //从数据库中获得搜索结果
 {
 	vector<string> temp_result;
 	vector<string> final_result;
